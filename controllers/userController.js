@@ -1,12 +1,13 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const router = express.Router();
 const UserModel = require('../models/UserModel');
 
-// To get the profile of the currently logged-in user
-router.get('/profile', async (req, res) => {
+// Route to get user profile by ID
+router.get('/profile/:id', async (req, res) => {
   try {
-    const userId = req.userId;
-    const user = await UserModel.findById(userId);
+    const userId = req.params.id;
+    const user = await UserModel.findOne({ _id: userId });
 
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
@@ -17,6 +18,7 @@ router.get('/profile', async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      permissions: user.permissions,
     });
   } catch (error) {
     console.error('Error fetching user profile:', error);
@@ -24,10 +26,32 @@ router.get('/profile', async (req, res) => {
   }
 });
 
-// To get all users
+// To get all users and get all the users with search functionality
 router.get('/records/users', async (req, res) => {
   try {
-    const users = await UserModel.find();
+    const searchKeyword = req.query.search;
+
+    let users;
+    if (searchKeyword) {
+      const isObjectId = mongoose.Types.ObjectId.isValid(searchKeyword);
+
+      if (isObjectId) {
+        users = await UserModel.find({
+          _id: searchKeyword,
+        });
+      } else {
+        const regex = new RegExp(searchKeyword, 'i');
+        users = await UserModel.find({
+          $or: [
+            { name: regex },
+            { email: regex },
+          ],
+        }).collation({ locale: 'en', strength: 2 });
+      }
+    } else {
+      users = await UserModel.find();
+    }
+
     res.json(users);
   } catch (error) {
     console.error('Error fetching user records:', error);
@@ -63,15 +87,15 @@ router.get('/records/users/:id', async (req, res) => {
   }
 });
 
-// To update a user's permissions by ID
+// To update a user's role, permissions, and status by ID
 router.put('/records/users/:id', async (req, res) => {
   try {
     const userId = req.params.id;
-    const { permissions } = req.body;
+    const { role, permissions, status } = req.body;
 
     const user = await UserModel.findByIdAndUpdate(
       userId,
-      { $set: { permissions } },
+      { $set: { role, permissions, status } },
       { new: true }
     );
 
@@ -81,9 +105,10 @@ router.put('/records/users/:id', async (req, res) => {
 
     res.json(user);
   } catch (error) {
-    console.error('Error updating user permissions:', error);
+    console.error('Error updating user role, permissions, and status:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 
 module.exports = router;

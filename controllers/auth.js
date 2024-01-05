@@ -1,10 +1,10 @@
-// auth.js
 const express = require('express');
 const bcrypt = require('bcrypt');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const UserModel = require('../models/UserModel');
 
+// for signup
 router.post('/signup', async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -21,17 +21,30 @@ router.post('/signup', async (req, res) => {
       name,
       email,
       password: hashedPassword,
+      status: 'Active',
     });
 
     const savedUser = await newUser.save();
 
-    res.status(200).json({ message: 'User registered successfully' });
+    // Generate a token after user is saved
+    const token = jwt.sign({ userId: savedUser._id, userName : savedUser.name }, 'your-secret-key', {
+      expiresIn: '1d',
+    });
+
+    res.status(200).json({
+      success: true,
+      token: token,
+      userId: savedUser._id,
+      userName: savedUser.name,
+      status: user.status,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
+// for login
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -47,11 +60,17 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
-    const token = jwt.sign({ userId: user._id }, 'your-secret-key', {
+    const token = jwt.sign({ userId: user._id, userName: user.name }, 'your-secret-key', {
       expiresIn: '1d',
     });
 
-    res.status(200).json({ token });
+    res.status(200).json({
+      success: true,
+      token: token,
+      userId: user._id,
+      userName: user.name,
+      status: user.status,
+    });
 
   } catch (error) {
     console.error(error);
@@ -59,6 +78,7 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// for logout
 router.post('/logout', (req, res) => {
   req.logout();
   res.status(200).json({ message: 'Logout successful' });

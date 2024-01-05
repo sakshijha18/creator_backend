@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 
 const InvoiceSchema = new mongoose.Schema({
 
+    recordOwnerId: { type: String, required: true },
+    recordOwnerName: { type: String, required: true },
     companyName: { type: String, required: true },
     documentReference: { type: String, required: true },
     documentType: { type: String, required: true },

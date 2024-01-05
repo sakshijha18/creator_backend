@@ -6,6 +6,8 @@ try {
 } catch (e) {
   const goodsSchema = new mongoose.Schema({
     
+    recordOwnerId: { type: String, required: true },
+    recordOwnerName: { type: String, required: true },
     purchaseOrderNumber: { type: String, required: true },
     deliveryChallanDetails: { type: String, required: true },
     documentReference: { type: String, required: true },

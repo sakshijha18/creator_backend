@@ -6,6 +6,8 @@ try {
 } catch (e) {
   const contractSchema = new mongoose.Schema({
     
+    recordOwnerId: { type: String, required: true },
+    recordOwnerName: { type: String, required: true },
     companyName: { type: String, required: true },
     vendorCode: { type: String, required: true },
     address: { type: String, required: true },

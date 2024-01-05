@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -16,8 +16,8 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['user', 'admin'],
-    default: 'user',
+    enum: ["User", "Admin", "Vendor"],
+    default: "User",
   },
   permissions: {
     contractApprover: {
@@ -45,8 +45,13 @@ const userSchema = new mongoose.Schema({
       default: false,
     },
   },
+  status: {
+    type: String,
+    enum: ["Active", "Blocked"],
+    default: "Active",
+  },
 });
 
-const UserModel = mongoose.model('User', userSchema);
+const UserModel = mongoose.model("User", userSchema);
 
 module.exports = UserModel;

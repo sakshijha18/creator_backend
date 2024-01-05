@@ -1,12 +1,14 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const jwt = require('jsonwebtoken');
-const ContractModel = require('../models/ContractModel');
+const jwt = require("jsonwebtoken");
+const ContractModel = require("../models/ContractModel");
 
 // POST request for contract form
 router.post("/forms/contract", async (req, res) => {
   try {
     const {
+      recordOwnerId,
+      recordOwnerName,
       companyName,
       vendorCode,
       address,
@@ -21,6 +23,8 @@ router.post("/forms/contract", async (req, res) => {
     } = req.body;
 
     const contract = new ContractModel({
+      recordOwnerId,
+      recordOwnerName,
       companyName,
       vendorCode,
       address,
@@ -44,30 +48,30 @@ router.post("/forms/contract", async (req, res) => {
 });
 
 // get all records
-router.get('/records/contracts', async (req, res) => {
+router.get("/records/contracts", async (req, res) => {
   try {
     const contract = await ContractModel.find();
     res.json(contract); // Sending JSON response to React client
   } catch (error) {
-    console.error('Error fetching user records:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Error fetching user records:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
 // To get a single contract by ID
-router.get('/records/contract/:id', async (req, res) => {
+router.get("/records/contract/:id", async (req, res) => {
   try {
     const contractId = req.params.id;
     const contract = await ContractModel.findById(contractId);
 
     if (!contract) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: "User not found" });
     }
 
     res.json(contract);
   } catch (error) {
-    console.error('Error fetching user record:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Error fetching user record:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
